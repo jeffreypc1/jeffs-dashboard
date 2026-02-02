@@ -254,6 +254,28 @@
             font-style: italic;
         }
 
+        .notes-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .notes-list li {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .notes-list li:last-child {
+            border-bottom: none;
+        }
+
+        .note-date {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-left: 0.5rem;
+        }
+
         footer {
             margin-top: 3rem;
             padding-top: 1.5rem;
@@ -435,7 +457,7 @@
             </div>
 
             <!-- Notes from Beck -->
-            <div class="card" style="grid-column: span 2;">
+            <div class="card">
                 <div class="card-header">
                     <div class="card-title">
                         <span class="card-icon">📝</span>
@@ -443,23 +465,31 @@
                     </div>
                 </div>
                 <div class="notes-section">
-                    <h4>Today's Summary</h4>
+                    <h4>Setup Complete</h4>
                     <div class="notes-content">
-                        <strong>Setup Complete:</strong><br>
                         ✓ Gmail connected (16,500+ emails cleaned)<br>
-                        ✓ GitHub connected (projects accessible)<br>
+                        ✓ GitHub connected<br>
                         ✓ Daily 8am email check scheduled<br>
                         ✓ Clara's Cottage website live<br>
-                        ✓ Task board created<br><br>
-                        
-                        <strong>Message me on WhatsApp to:</strong><br>
-                        • Add tasks to your board<br>
-                        • Draft email replies<br>
-                        • Work on coding projects<br>
-                        • Check calendar or emails<br>
+                        ✓ Task board created
                     </div>
-                    <div class="update-time">Last updated: February 1, 2026</div>
+                    <div class="update-time">February 1, 2026</div>
                 </div>
+            </div>
+
+            <!-- Quick Notes -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">💭</span>
+                        Quick Notes
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Say "Beck, note: ..."</span>
+                </div>
+                <div id="notes-container">
+                    <ul class="notes-list" id="notes-list"></ul>
+                </div>
+                <div class="update-time" id="notes-updated"></div>
             </div>
         </div>
 
@@ -486,6 +516,25 @@
         }
         updateTime();
         setInterval(updateTime, 60000);
+
+        // Load notes
+        async function loadNotes() {
+            try {
+                const response = await fetch('notes.json?t=' + Date.now());
+                const data = await response.json();
+                const notesList = document.getElementById('notes-list');
+                const notesUpdated = document.getElementById('notes-updated');
+                
+                notesList.innerHTML = data.notes.map(note => 
+                    `<li>${note.text}<span class="note-date">${note.date}</span></li>`
+                ).join('');
+                
+                notesUpdated.textContent = 'Updated: ' + data.lastUpdated;
+            } catch (e) {
+                document.getElementById('notes-list').innerHTML = '<li>No notes yet</li>';
+            }
+        }
+        loadNotes();
     </script>
 </body>
 </html>
