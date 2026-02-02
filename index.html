@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeff's Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+            --card-hover: #252525;
+            --border: #2a2a2a;
+            --text: #e5e5e5;
+            --text-muted: #888;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --purple: #a855f7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--green);
+            color: black;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .time {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            background: var(--card-hover);
+            border-color: #3a3a3a;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            font-size: 1.2rem;
+        }
+
+        .link-list {
+            list-style: none;
+        }
+
+        .link-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .link-list a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .link-list a:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .link-emoji {
+            font-size: 1.3rem;
+        }
+
+        .link-text {
+            flex: 1;
+        }
+
+        .link-arrow {
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .link-list a:hover .link-arrow {
+            transform: translateX(3px);
+            color: white;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .quick-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .quick-btn:hover {
+            background: var(--card-hover);
+            border-color: var(--accent);
+        }
+
+        .quick-btn .emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-btn .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .status-list {
+            list-style: none;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.green { background: var(--green); }
+        .status-dot.yellow { background: var(--yellow); }
+        .status-dot.red { background: var(--red); }
+
+        .status-value {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .notes-section {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .notes-section h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .notes-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .update-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                ⚙️ Jeff's Dashboard
+                <span class="status-badge">Online</span>
+            </h1>
+            <div class="time" id="current-time"></div>
+        </header>
+
+        <div class="grid">
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">⚡</span>
+                        Quick Actions
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <a href="https://mail.google.com" target="_blank" class="quick-btn">
+                        <span class="emoji">📧</span>
+                        <span class="label">Gmail</span>
+                    </a>
+                    <a href="https://github.com/users/jeffreypc1/projects/1" target="_blank" class="quick-btn">
+                        <span class="emoji">📋</span>
+                        <span class="label">Tasks Board</span>
+                    </a>
+                    <a href="https://calendar.google.com" target="_blank" class="quick-btn">
+                        <span class="emoji">📅</span>
+                        <span class="label">Calendar</span>
+                    </a>
+                    <a href="https://github.com/jeffreypc1" target="_blank" class="quick-btn">
+                        <span class="emoji">💻</span>
+                        <span class="label">GitHub</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Projects -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">🚀</span>
+                        Active Projects
+                    </div>
+                </div>
+                <ul class="link-list">
+                    <li>
+                        <a href="https://jeffreypc1.github.io/claras-cottage/" target="_blank">
+                            <span class="link-emoji">🏠</span>
+                            <span class="link-text">Clara's Cottage (Website)</span>
+                            <span class="link-arrow">→</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://jeffreypc1.github.io/claras-cottage/admin.html" target="_blank">
+                            <span class="link-emoji">🔧</span>
+                            <span class="link-text">Clara's Cottage (Admin)</span>
+                            <span class="link-arrow">→</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/jeffreypc1/ecasscrape" target="_blank">
+                            <span class="link-emoji">📊</span>
+                            <span class="link-text">EOIR Scraper</span>
+                            <span class="link-arrow">→</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Work Tools -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">💼</span>
+                        Work Tools
+                    </div>
+                </div>
+                <ul class="link-list">
+                    <li>
+                        <a href="https://login.salesforce.com" target="_blank">
+                            <span class="link-emoji">☁️</span>
+                            <span class="link-text">Salesforce</span>
+                            <span class="link-arrow">→</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://app.lawpay.com" target="_blank">
+                            <span class="link-emoji">💳</span>
+                            <span class="link-text">LawPay</span>
+                            <span class="link-arrow">→</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://portal.eoir.justice.gov" target="_blank">
+                            <span class="link-emoji">⚖️</span>
+                            <span class="link-text">EOIR Portal</span>
+                            <span class="link-arrow">→</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Beck Status -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">🤖</span>
+                        Beck (AI Assistant)
+                    </div>
+                </div>
+                <ul class="status-list">
+                    <li class="status-item">
+                        <span class="status-name">
+                            <span class="status-dot green"></span>
+                            WhatsApp Connection
+                        </span>
+                        <span class="status-value">Active</span>
+                    </li>
+                    <li class="status-item">
+                        <span class="status-name">
+                            <span class="status-dot green"></span>
+                            Gmail Access
+                        </span>
+                        <span class="status-value">Connected</span>
+                    </li>
+                    <li class="status-item">
+                        <span class="status-name">
+                            <span class="status-dot green"></span>
+                            GitHub Access
+                        </span>
+                        <span class="status-value">Connected</span>
+                    </li>
+                    <li class="status-item">
+                        <span class="status-name">
+                            <span class="status-dot green"></span>
+                            Daily Email Check
+                        </span>
+                        <span class="status-value">8:00 AM</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Notes from Beck -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">📝</span>
+                        Latest from Beck
+                    </div>
+                </div>
+                <div class="notes-section">
+                    <h4>Today's Summary</h4>
+                    <div class="notes-content">
+                        <strong>Setup Complete:</strong><br>
+                        ✓ Gmail connected (16,500+ emails cleaned)<br>
+                        ✓ GitHub connected (projects accessible)<br>
+                        ✓ Daily 8am email check scheduled<br>
+                        ✓ Clara's Cottage website live<br>
+                        ✓ Task board created<br><br>
+                        
+                        <strong>Message me on WhatsApp to:</strong><br>
+                        • Add tasks to your board<br>
+                        • Draft email replies<br>
+                        • Work on coding projects<br>
+                        • Check calendar or emails<br>
+                    </div>
+                    <div class="update-time">Last updated: February 1, 2026</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Dashboard powered by <a href="https://github.com/jeffreypc1/jeffs-dashboard">GitHub Pages</a> • 
+               Assistant: Beck ⚙️ via <a href="https://openclaw.ai">OpenClaw</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            };
+            document.getElementById('current-time').textContent = now.toLocaleDateString('en-US', options);
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+    </script>
+</body>
+</html>
