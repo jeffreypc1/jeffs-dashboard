@@ -338,51 +338,85 @@
         </header>
 
         <div class="grid">
-            <!-- Voice Input -->
+            <!-- Talk to Beck -->
             <div class="card" style="grid-column: span 2;">
                 <div class="card-header">
                     <div class="card-title">
-                        <span class="card-icon">🎤</span>
+                        <span class="card-icon">💬</span>
                         Talk to Beck
                     </div>
-                    <span id="voice-status" style="font-size: 0.8rem; color: var(--text-muted);">Click to speak</span>
                 </div>
-                <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                    <button id="voice-btn" onclick="toggleVoice()" style="
-                        width: 80px; height: 80px; border-radius: 50%; 
-                        background: var(--accent); border: none; 
-                        font-size: 2.5rem; cursor: pointer;
-                        transition: all 0.2s ease; flex-shrink: 0;
-                    ">🎤</button>
-                    <div style="flex: 1;">
-                        <div id="transcript-box" style="
-                            background: var(--bg); border: 1px solid var(--border);
-                            border-radius: 8px; padding: 1rem; min-height: 60px;
-                            font-size: 0.95rem; color: var(--text);
-                        ">
-                            <span style="color: var(--text-muted);">Your message will appear here...</span>
-                        </div>
-                        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
-                            <button id="send-btn" onclick="sendMessage()" disabled style="
-                                flex: 1; padding: 0.6rem; background: var(--green);
-                                border: none; border-radius: 6px; color: white;
-                                font-size: 0.9rem; cursor: pointer; opacity: 0.5;
-                            ">Send to Beck</button>
-                            <button onclick="clearTranscript()" style="
-                                padding: 0.6rem 1rem; background: var(--card);
-                                border: 1px solid var(--border); border-radius: 6px;
-                                color: var(--text-muted); font-size: 0.9rem; cursor: pointer;
-                            ">Clear</button>
+                
+                <!-- Two options: WhatsApp or Voice -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <a href="https://wa.me/14154380229" target="_blank" style="
+                        display: flex; flex-direction: column; align-items: center; justify-content: center;
+                        padding: 1.5rem; background: #25D366; border-radius: 12px;
+                        text-decoration: none; color: white; transition: all 0.2s;
+                    " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <span style="font-size: 2.5rem; margin-bottom: 0.5rem;">📱</span>
+                        <span style="font-size: 1.1rem; font-weight: 600;">WhatsApp</span>
+                        <span style="font-size: 0.8rem; opacity: 0.9;">Open chat directly</span>
+                    </a>
+                    <button onclick="document.getElementById('voice-section').style.display = document.getElementById('voice-section').style.display === 'none' ? 'block' : 'none'" style="
+                        display: flex; flex-direction: column; align-items: center; justify-content: center;
+                        padding: 1.5rem; background: var(--accent); border-radius: 12px;
+                        border: none; color: white; cursor: pointer; transition: all 0.2s;
+                    " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <span style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎤</span>
+                        <span style="font-size: 1.1rem; font-weight: 600;">Voice Input</span>
+                        <span style="font-size: 0.8rem; opacity: 0.9;">Speak from browser</span>
+                    </button>
+                </div>
+
+                <!-- Voice Input Section (hidden by default) -->
+                <div id="voice-section" style="display: none; border-top: 1px solid var(--border); padding-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="font-size: 0.9rem; color: var(--text-muted);">Voice Input</span>
+                        <span id="voice-status" style="font-size: 0.8rem; color: var(--text-muted);">Click to speak</span>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <button id="voice-btn" onclick="toggleVoice()" style="
+                            width: 60px; height: 60px; border-radius: 50%; 
+                            background: var(--accent); border: none; 
+                            font-size: 1.8rem; cursor: pointer;
+                            transition: all 0.2s ease; flex-shrink: 0;
+                        ">🎤</button>
+                        <div style="flex: 1;">
+                            <div id="transcript-box" style="
+                                background: var(--bg); border: 1px solid var(--border);
+                                border-radius: 8px; padding: 0.75rem; min-height: 50px;
+                                font-size: 0.9rem; color: var(--text);
+                            ">
+                                <span style="color: var(--text-muted);">Your message will appear here...</span>
+                            </div>
+                            <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                                <button id="send-btn" onclick="sendMessage()" disabled style="
+                                    flex: 1; padding: 0.5rem; background: var(--green);
+                                    border: none; border-radius: 6px; color: white;
+                                    font-size: 0.85rem; cursor: pointer; opacity: 0.5;
+                                ">Send to Beck</button>
+                                <button onclick="copyToWhatsApp()" style="
+                                    padding: 0.5rem 0.75rem; background: #25D366;
+                                    border: none; border-radius: 6px; color: white;
+                                    font-size: 0.85rem; cursor: pointer;
+                                ">📱 Copy to WhatsApp</button>
+                                <button onclick="clearTranscript()" style="
+                                    padding: 0.5rem 0.75rem; background: var(--card);
+                                    border: 1px solid var(--border); border-radius: 6px;
+                                    color: var(--text-muted); font-size: 0.85rem; cursor: pointer;
+                                ">Clear</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div id="beck-response" style="
-                    margin-top: 1rem; padding: 1rem; 
-                    background: var(--card-hover); border-radius: 8px;
-                    display: none;
-                ">
-                    <div style="font-size: 0.8rem; color: var(--accent); margin-bottom: 0.5rem;">Beck's Response:</div>
-                    <div id="response-text"></div>
+                    <div id="beck-response" style="
+                        margin-top: 1rem; padding: 0.75rem; 
+                        background: var(--card-hover); border-radius: 8px;
+                        display: none; font-size: 0.9rem;
+                    ">
+                        <div style="font-size: 0.75rem; color: var(--accent); margin-bottom: 0.25rem;">Beck's Response:</div>
+                        <div id="response-text"></div>
+                    </div>
                 </div>
             </div>
 
@@ -724,6 +758,18 @@
             document.getElementById('send-btn').disabled = true;
             document.getElementById('send-btn').style.opacity = '0.5';
             document.getElementById('beck-response').style.display = 'none';
+        }
+        
+        function copyToWhatsApp() {
+            const message = transcript.trim();
+            if (!message) {
+                alert('Nothing to send. Record a message first.');
+                return;
+            }
+            // Open WhatsApp with the message pre-filled
+            const encoded = encodeURIComponent(message);
+            window.open('https://wa.me/14154380229?text=' + encoded, '_blank');
+            clearTranscript();
         }
         
         async function sendMessage() {
