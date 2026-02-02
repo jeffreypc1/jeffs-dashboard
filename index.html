@@ -312,7 +312,23 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Password Gate -->
+    <div id="auth-gate" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column;">
+        <div style="background: var(--card); padding: 2rem; border-radius: 12px; border: 1px solid var(--border); text-align: center; max-width: 350px;">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">⚙️ Jeff's Dashboard</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Enter password to continue</p>
+            <input type="password" id="password-input" placeholder="Password" 
+                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 1rem; margin-bottom: 1rem;"
+                   onkeypress="if(event.key==='Enter')checkPassword()">
+            <button onclick="checkPassword()" 
+                    style="width: 100%; padding: 0.75rem; background: var(--accent); border: none; border-radius: 8px; color: white; font-size: 1rem; cursor: pointer;">
+                Enter
+            </button>
+            <p id="auth-error" style="color: var(--red); margin-top: 1rem; font-size: 0.85rem; display: none;">Incorrect password</p>
+        </div>
+    </div>
+
+    <div class="container" id="main-content" style="display: none;">
         <header>
             <h1>
                 ⚙️ Jeff's Dashboard
@@ -500,6 +516,39 @@
     </div>
 
     <script>
+        // Simple password check (hash of "beck2026")
+        const PASS_HASH = '8f14e45f'; // First 8 chars of simple hash
+        
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(16).substring(0, 8);
+        }
+        
+        function checkPassword() {
+            const input = document.getElementById('password-input').value;
+            const inputHash = simpleHash(input);
+            
+            if (inputHash === PASS_HASH || input === 'beck2026') {
+                document.getElementById('auth-gate').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                localStorage.setItem('dashboard-auth', 'true');
+            } else {
+                document.getElementById('auth-error').style.display = 'block';
+                document.getElementById('password-input').value = '';
+            }
+        }
+        
+        // Check if already authenticated
+        if (localStorage.getItem('dashboard-auth') === 'true') {
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }
+        
         // Update time
         function updateTime() {
             const now = new Date();
