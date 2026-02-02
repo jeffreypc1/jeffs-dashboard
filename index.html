@@ -338,6 +338,54 @@
         </header>
 
         <div class="grid">
+            <!-- Voice Input -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">🎤</span>
+                        Talk to Beck
+                    </div>
+                    <span id="voice-status" style="font-size: 0.8rem; color: var(--text-muted);">Click to speak</span>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <button id="voice-btn" onclick="toggleVoice()" style="
+                        width: 80px; height: 80px; border-radius: 50%; 
+                        background: var(--accent); border: none; 
+                        font-size: 2.5rem; cursor: pointer;
+                        transition: all 0.2s ease; flex-shrink: 0;
+                    ">🎤</button>
+                    <div style="flex: 1;">
+                        <div id="transcript-box" style="
+                            background: var(--bg); border: 1px solid var(--border);
+                            border-radius: 8px; padding: 1rem; min-height: 60px;
+                            font-size: 0.95rem; color: var(--text);
+                        ">
+                            <span style="color: var(--text-muted);">Your message will appear here...</span>
+                        </div>
+                        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                            <button id="send-btn" onclick="sendMessage()" disabled style="
+                                flex: 1; padding: 0.6rem; background: var(--green);
+                                border: none; border-radius: 6px; color: white;
+                                font-size: 0.9rem; cursor: pointer; opacity: 0.5;
+                            ">Send to Beck</button>
+                            <button onclick="clearTranscript()" style="
+                                padding: 0.6rem 1rem; background: var(--card);
+                                border: 1px solid var(--border); border-radius: 6px;
+                                color: var(--text-muted); font-size: 0.9rem; cursor: pointer;
+                            ">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="beck-response" style="
+                    margin-top: 1rem; padding: 1rem; 
+                    background: var(--card-hover); border-radius: 8px;
+                    display: none;
+                ">
+                    <div style="font-size: 0.8rem; color: var(--accent); margin-bottom: 0.5rem;">Beck's Response:</div>
+                    <div id="response-text"></div>
+                </div>
+            </div>
+
             <!-- Quick Actions -->
             <div class="card">
                 <div class="card-header">
@@ -511,7 +559,8 @@
 
         <footer>
             <p>Dashboard powered by <a href="https://github.com/jeffreypc1/jeffs-dashboard">GitHub Pages</a> • 
-               Assistant: Beck ⚙️ via <a href="https://openclaw.ai">OpenClaw</a></p>
+               Assistant: Beck ⚙️ via <a href="https://openclaw.ai">OpenClaw</a> •
+               <a href="#" onclick="setGatewayUrl(); return false;">⚙️ Settings</a></p>
         </footer>
     </div>
 
@@ -584,6 +633,159 @@
             }
         }
         loadNotes();
+
+        // Voice Recognition
+        let recognition = null;
+        let isListening = false;
+        let transcript = '';
+        
+        // Gateway URL (will be updated with Tailscale)
+        let GATEWAY_URL = localStorage.getItem('gateway-url') || '';
+        
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                if (finalTranscript) {
+                    transcript += finalTranscript + ' ';
+                }
+                
+                document.getElementById('transcript-box').innerHTML = 
+                    transcript + '<span style="color: var(--text-muted)">' + interimTranscript + '</span>';
+                
+                if (transcript.trim()) {
+                    document.getElementById('send-btn').disabled = false;
+                    document.getElementById('send-btn').style.opacity = '1';
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech error:', event.error);
+                stopListening();
+            };
+            
+            recognition.onend = () => {
+                if (isListening) {
+                    recognition.start(); // Keep listening
+                }
+            };
+        }
+        
+        function toggleVoice() {
+            if (!recognition) {
+                alert('Speech recognition not supported in this browser. Try Chrome.');
+                return;
+            }
+            
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+        
+        function startListening() {
+            isListening = true;
+            recognition.start();
+            document.getElementById('voice-btn').style.background = 'var(--red)';
+            document.getElementById('voice-btn').innerHTML = '⏹️';
+            document.getElementById('voice-status').textContent = 'Listening...';
+            document.getElementById('voice-status').style.color = 'var(--red)';
+        }
+        
+        function stopListening() {
+            isListening = false;
+            recognition.stop();
+            document.getElementById('voice-btn').style.background = 'var(--accent)';
+            document.getElementById('voice-btn').innerHTML = '🎤';
+            document.getElementById('voice-status').textContent = 'Click to speak';
+            document.getElementById('voice-status').style.color = 'var(--text-muted)';
+        }
+        
+        function clearTranscript() {
+            transcript = '';
+            document.getElementById('transcript-box').innerHTML = 
+                '<span style="color: var(--text-muted);">Your message will appear here...</span>';
+            document.getElementById('send-btn').disabled = true;
+            document.getElementById('send-btn').style.opacity = '0.5';
+            document.getElementById('beck-response').style.display = 'none';
+        }
+        
+        async function sendMessage() {
+            const message = transcript.trim();
+            if (!message) return;
+            
+            if (!GATEWAY_URL) {
+                // Prompt for gateway URL if not set
+                const url = prompt('Enter your OpenClaw gateway URL (e.g., https://your-machine.tail1234.ts.net:18789):');
+                if (url) {
+                    GATEWAY_URL = url;
+                    localStorage.setItem('gateway-url', url);
+                } else {
+                    alert('Gateway URL required. Set up Tailscale first.');
+                    return;
+                }
+            }
+            
+            document.getElementById('send-btn').textContent = 'Sending...';
+            document.getElementById('send-btn').disabled = true;
+            
+            try {
+                // Send to OpenClaw gateway
+                const response = await fetch(GATEWAY_URL + '/api/agent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        channel: 'dashboard'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('beck-response').style.display = 'block';
+                    document.getElementById('response-text').textContent = data.reply || 'Message sent!';
+                } else {
+                    throw new Error('Gateway error');
+                }
+            } catch (error) {
+                // Fallback: Show message was captured
+                document.getElementById('beck-response').style.display = 'block';
+                document.getElementById('response-text').innerHTML = 
+                    '⚠️ Could not reach gateway. Message captured:<br><br>"' + message + '"<br><br>' +
+                    '<small style="color: var(--text-muted);">Copy and send via WhatsApp, or check gateway connection.</small>';
+            }
+            
+            document.getElementById('send-btn').textContent = 'Send to Beck';
+            document.getElementById('send-btn').disabled = false;
+        }
+        
+        // Settings for gateway URL
+        function setGatewayUrl() {
+            const url = prompt('Enter OpenClaw Gateway URL:', GATEWAY_URL);
+            if (url !== null) {
+                GATEWAY_URL = url;
+                localStorage.setItem('gateway-url', url);
+                alert('Gateway URL saved!');
+            }
+        }
     </script>
 </body>
 </html>
