@@ -639,8 +639,8 @@
         let isListening = false;
         let transcript = '';
         
-        // Gateway URL (will be updated with Tailscale)
-        let GATEWAY_URL = localStorage.getItem('gateway-url') || '';
+        // Gateway URL (Tailscale Funnel)
+        let GATEWAY_URL = localStorage.getItem('gateway-url') || 'https://jeffs-macbook-pro.tail059a5f.ts.net';
         
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
