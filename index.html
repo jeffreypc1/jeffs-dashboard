@@ -228,6 +228,36 @@
             font-size: 0.9rem;
         }
 
+        .status-value.clickable {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .status-value.clickable:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .status-details-footer {
+            margin-top: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        .status-details-footer .detail-service {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .status-details-footer .detail-time {
+            color: var(--text);
+        }
+
         .notes-section {
             background: var(--bg);
             border: 1px solid var(--border);
@@ -522,36 +552,40 @@
                         Beck (AI Assistant)
                     </div>
                 </div>
-                <ul class="status-list">
-                    <li class="status-item">
+                <ul class="status-list" id="beck-status-list">
+                    <li class="status-item" data-service="whatsapp">
                         <span class="status-name">
-                            <span class="status-dot green"></span>
+                            <span class="status-dot" id="dot-whatsapp"></span>
                             WhatsApp Connection
                         </span>
-                        <span class="status-value">Active</span>
+                        <span class="status-value clickable" id="status-whatsapp" onclick="showStatusDetail('whatsapp')">Unknown</span>
                     </li>
-                    <li class="status-item">
+                    <li class="status-item" data-service="gmail">
                         <span class="status-name">
-                            <span class="status-dot green"></span>
+                            <span class="status-dot" id="dot-gmail"></span>
                             Gmail Access
                         </span>
-                        <span class="status-value">Connected</span>
+                        <span class="status-value clickable" id="status-gmail" onclick="showStatusDetail('gmail')">Unknown</span>
                     </li>
-                    <li class="status-item">
+                    <li class="status-item" data-service="github">
                         <span class="status-name">
-                            <span class="status-dot green"></span>
+                            <span class="status-dot" id="dot-github"></span>
                             GitHub Access
                         </span>
-                        <span class="status-value">Connected</span>
+                        <span class="status-value clickable" id="status-github" onclick="showStatusDetail('github')">Unknown</span>
                     </li>
-                    <li class="status-item">
+                    <li class="status-item" data-service="dailycheck">
                         <span class="status-name">
-                            <span class="status-dot green"></span>
+                            <span class="status-dot" id="dot-dailycheck"></span>
                             Daily Email Check
                         </span>
-                        <span class="status-value">8:00 AM</span>
+                        <span class="status-value clickable" id="status-dailycheck" onclick="showStatusDetail('dailycheck')">Unknown</span>
                     </li>
                 </ul>
+                <div class="status-details-footer" id="status-details-footer">
+                    <span class="detail-service" id="detail-service-name"></span>
+                    — Last successful handshake: <span class="detail-time" id="detail-time"></span>
+                </div>
             </div>
 
             <!-- Notes from Beck -->
@@ -668,6 +702,71 @@
             }
         }
         loadNotes();
+
+        // Beck status tracking - global state
+        let beckStatus = {};
+
+        async function loadBeckStatus() {
+            try {
+                const response = await fetch('status.json?t=' + Date.now());
+                const data = await response.json();
+                beckStatus = data.services || {};
+                renderBeckStatus();
+            } catch (e) {
+                console.error('Failed to load status.json:', e);
+                // Leave defaults as "Unknown" with no dot color
+                renderBeckStatus();
+            }
+        }
+
+        function renderBeckStatus() {
+            const serviceKeys = ['whatsapp', 'gmail', 'github', 'dailycheck'];
+            serviceKeys.forEach(key => {
+                const service = beckStatus[key];
+                const statusEl = document.getElementById('status-' + key);
+                const dotEl = document.getElementById('dot-' + key);
+                if (service && service.status) {
+                    statusEl.textContent = service.status;
+                    dotEl.className = 'status-dot ' + (service.color || 'green');
+                } else {
+                    statusEl.textContent = 'Unknown';
+                    dotEl.className = 'status-dot yellow';
+                }
+            });
+        }
+
+        function showStatusDetail(key) {
+            const service = beckStatus[key];
+            const footer = document.getElementById('status-details-footer');
+            const nameEl = document.getElementById('detail-service-name');
+            const timeEl = document.getElementById('detail-time');
+
+            if (!service) {
+                nameEl.textContent = key;
+                timeEl.textContent = 'No data available';
+            } else {
+                nameEl.textContent = service.name || key;
+                if (service.lastChecked) {
+                    const date = new Date(service.lastChecked);
+                    timeEl.textContent = date.toLocaleString('en-US', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        timeZoneName: 'short'
+                    });
+                } else {
+                    timeEl.textContent = 'Never';
+                }
+            }
+
+            footer.style.display = 'block';
+        }
+
+        loadBeckStatus();
 
         // Voice Recognition
         let recognition = null;

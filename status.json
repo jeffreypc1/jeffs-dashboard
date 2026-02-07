@@ -1,0 +1,29 @@
+{
+    "services": {
+        "whatsapp": {
+            "name": "WhatsApp Connection",
+            "status": "Active",
+            "color": "green",
+            "lastChecked": "2026-02-07T08:00:00-08:00"
+        },
+        "gmail": {
+            "name": "Gmail Access",
+            "status": "Connected",
+            "color": "green",
+            "lastChecked": "2026-02-07T08:00:00-08:00"
+        },
+        "github": {
+            "name": "GitHub Access",
+            "status": "Connected",
+            "color": "green",
+            "lastChecked": "2026-02-07T08:00:00-08:00"
+        },
+        "dailycheck": {
+            "name": "Daily Email Check",
+            "status": "8:00 AM",
+            "color": "green",
+            "lastChecked": "2026-02-07T08:00:00-08:00"
+        }
+    },
+    "lastUpdated": "2026-02-07T08:00:00-08:00"
+}
