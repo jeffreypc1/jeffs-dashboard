@@ -228,6 +228,35 @@
             font-size: 0.9rem;
         }
 
+        .status-value.clickable {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .status-value.clickable:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .status-details-footer {
+            margin-top: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        .status-details-footer.visible {
+            display: block;
+        }
+
+        .status-details-footer strong {
+            color: var(--text);
+        }
+
         .notes-section {
             background: var(--bg);
             border: 1px solid var(--border);
@@ -522,36 +551,10 @@
                         Beck (AI Assistant)
                     </div>
                 </div>
-                <ul class="status-list">
-                    <li class="status-item">
-                        <span class="status-name">
-                            <span class="status-dot green"></span>
-                            WhatsApp Connection
-                        </span>
-                        <span class="status-value">Active</span>
-                    </li>
-                    <li class="status-item">
-                        <span class="status-name">
-                            <span class="status-dot green"></span>
-                            Gmail Access
-                        </span>
-                        <span class="status-value">Connected</span>
-                    </li>
-                    <li class="status-item">
-                        <span class="status-name">
-                            <span class="status-dot green"></span>
-                            GitHub Access
-                        </span>
-                        <span class="status-value">Connected</span>
-                    </li>
-                    <li class="status-item">
-                        <span class="status-name">
-                            <span class="status-dot green"></span>
-                            Daily Email Check
-                        </span>
-                        <span class="status-value">8:00 AM</span>
-                    </li>
+                <ul class="status-list" id="beck-status-list">
+                    <li class="status-item"><span class="status-name">Loading...</span></li>
                 </ul>
+                <div class="status-details-footer" id="status-details-footer"></div>
             </div>
 
             <!-- Notes from Beck -->
@@ -668,6 +671,61 @@
             }
         }
         loadNotes();
+
+        // Beck Status Tracking
+        let beckStatus = {};
+
+        async function loadBeckStatus() {
+            const statusList = document.getElementById('beck-status-list');
+            const footer = document.getElementById('status-details-footer');
+            try {
+                const response = await fetch('status.json?t=' + Date.now());
+                const data = await response.json();
+                beckStatus = data.services || {};
+            } catch (e) {
+                beckStatus = {};
+            }
+
+            const defaultServices = ['whatsapp', 'gmail', 'github', 'dailycheck'];
+            const defaultNames = {
+                whatsapp: 'WhatsApp Connection',
+                gmail: 'Gmail Access',
+                github: 'GitHub Access',
+                dailycheck: 'Daily Email Check'
+            };
+
+            statusList.innerHTML = defaultServices.map(key => {
+                const svc = beckStatus[key] || {};
+                const name = svc.name || defaultNames[key];
+                const status = svc.status || 'Unknown';
+                const color = svc.color || (status === 'Unknown' ? 'yellow' : 'green');
+                return `<li class="status-item">
+                    <span class="status-name">
+                        <span class="status-dot ${color}"></span>
+                        ${name}
+                    </span>
+                    <span class="status-value clickable" data-service="${key}">${status}</span>
+                </li>`;
+            }).join('');
+
+            statusList.querySelectorAll('.status-value.clickable').forEach(el => {
+                el.addEventListener('click', function() {
+                    const key = this.dataset.service;
+                    const svc = beckStatus[key] || {};
+                    const name = svc.name || defaultNames[key];
+                    const lastChecked = svc.lastChecked
+                        ? new Date(svc.lastChecked).toLocaleString('en-US', {
+                            weekday: 'short', month: 'short', day: 'numeric',
+                            year: 'numeric', hour: 'numeric', minute: '2-digit',
+                            timeZoneName: 'short'
+                        })
+                        : 'Never';
+                    footer.innerHTML = '<strong>' + name + '</strong> — Last successful handshake: ' + lastChecked;
+                    footer.classList.add('visible');
+                });
+            });
+        }
+        loadBeckStatus();
 
         // Voice Recognition
         let recognition = null;
